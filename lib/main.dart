@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:http/http.dart' as http;
 import 'package:movie_app/model/results.model.dart';
-import 'package:splashscreen/splashscreen.dart';
+import 'package:intl/intl.dart';
 
 const baseUrl = "https://api.themoviedb.org/3/movie/";
 const baseUrlImage = "https://image.tmdb.org/t/p/";
@@ -15,7 +15,7 @@ const popularURL = "${baseUrl}popular?api_key=$apikey";
 const topRateURL = "${baseUrl}top_rated?api_key=$apikey";
 const NOWPLAYLIST = "EN LISTA AHORA";
 const PELITITULO = "PELIAPP";
-
+int _currentIndex = 0;
 //punto inicial donde se ejecuntan las app
 //main el cual ejecuta runApp tiene un materialApp home
 //widget StatefulWdget
@@ -30,33 +30,9 @@ void main() => runApp(
 
 class MyMobvieApp extends StatefulWidget {
   @override
-  _MyAppState  createState() => new _MyAppState ();
+  _MyMobvieApp  createState() => new _MyMobvieApp ();
   }
 
-
-
-  //Splash Screen
-
-class _MyAppState extends State<MyMobvieApp> {
-  @override
-  Widget build(BuildContext context) {
-    return new SplashScreen(
-        seconds: 14,
-        navigateAfterSeconds: new _MyMobvieApp(),
-        title: new Text("BIENVENIDOS",
-          style: new TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20.0
-          ),),
-        image: new Image.network('https://i.imgur.com/TyCSG9A.png'),
-        backgroundColor: Colors.white,
-        styleTextUnderTheLoader: new TextStyle(),
-        photoSize: 100.0,
-        onClick: ()=>print("Flutter Egypt"),
-        loaderColor: Colors.red
-    );
-  }
-}
 
 
 class _MyMobvieApp extends State<MyMobvieApp> {
@@ -148,7 +124,8 @@ class _MyMobvieApp extends State<MyMobvieApp> {
             ),
           ),
           Padding(padding: EdgeInsets.only(left: 6.0, top: 2.0),
-                  child: Text(movieItem.releaseDate,
+                  child: Text(DateFormat('yyyy')
+                      .format(DateTime.parse(movieItem.releaseDate)) ,
                       style: TextStyle(fontSize: 8.0)),
           )
         ],
@@ -194,50 +171,76 @@ class _MyMobvieApp extends State<MyMobvieApp> {
         (PELITITULO, style: TextStyle(
           color: Colors.white, fontSize: 14.0,
           fontWeight: FontWeight.bold),),
-          centerTitle: true ,
-          leading: IconButton
-        (icon: Icon(
-          Icons.menu), onPressed: (){ }), actions: <Widget>[
+        centerTitle: true ,
+        leading: IconButton
+          (icon: Icon(
+            Icons.menu), onPressed: (){ }), actions: <Widget>[
         IconButton(icon: Icon(Icons.search) ,onPressed: (){})
       ],),
       body: NestedScrollView(
           headerSliverBuilder: (BuildContext  context, bool innerBoxIsScrolled){
-          return <Widget>[
-            SliverAppBar(title: Center(
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: Text(NOWPLAYLIST, style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
-              ),
-            ),expandedHeight: 290.0, floating: false,
-              pinned: true,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Stack(children: <Widget>[
-                  Container(child: Image.network(
-                      "${baseUrlImage}w500/518jdIQHCZmYqIcNCaqbZuDRheV.jpg",
-                      fit: BoxFit.cover,
-                      width: 1000.0,
-                      colorBlendMode: BlendMode.dstATop,
-                      color: Colors.black54.withOpacity(0.5),
-                  ),
-                  ),
-                  Padding(padding: const EdgeInsets.only(top: 35),
-                    child:  _buildCarouselSlider(),
-                  )
-                ],
+            return <Widget>[
+              SliverAppBar(title: Center(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Text(NOWPLAYLIST, style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold)),
                 ),
+              ),expandedHeight: 290.0, floating: false,
+                  pinned: true,
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Stack(children: <Widget>[
+                      Container(child: Image.network(
+                        "${baseUrlImage}w500/518jdIQHCZmYqIcNCaqbZuDRheV.jpg",
+                        fit: BoxFit.cover,
+                        width: 1000.0,
+                        colorBlendMode: BlendMode.dstATop,
+                        color: Colors.black54.withOpacity(0.5),
+                      ),
+                      ),
+                      Padding(padding: const EdgeInsets.only(top: 35),
+                        child:  _buildCarouselSlider(),
+                      )
+                    ],
+                    ),
+                  )
               )
-            )
-          ];}, body: Center(
+            ];}, body: Center(
           child: ListView(children: <Widget>[
             _buildMoviesListView(incommigMovies, "PROXIMAMENTE"),
             _buildMoviesListView(popularMovies, "POPULAR"),
             _buildMoviesListView(topRateMovie, "LOS MAS VALORADOS")
           ],)
-        )
+      )
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        fixedColor: Colors.lightGreen,
+        onTap: (int index) {
+          setState(() {
+
+            _currentIndex = index;
+
+
+          });
+
+        },
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.local_movies),
+              title: Text("PELICULAS")),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.tag_faces),
+            title: Text("TIQUETES"),
+          ), 
+          BottomNavigationBarItem(icon: Icon(Icons.person),
+          title: Text("Cuenta")
+          )
+        ],
+
+      ),
+
     );
   }
 }
